@@ -113,9 +113,9 @@ namespace UTMLuncher
             }
         }
 
-        private State FullChecks(object state)
+        private Checks FullChecks(object state)
         {
-            State currentState = new State();
+            Checks currentState = new Checks();
 
             currentState.internetConnection = false;
             currentState.utmConnection = false;
@@ -201,7 +201,7 @@ namespace UTMLuncher
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            State currentState = new State(e.Result.ToString());
+            Checks currentState = new Checks(e.Result.ToString());
 
             bool Transport = currentState.Transport;
             bool TransportMonitoring = currentState.TransportMonitoring;

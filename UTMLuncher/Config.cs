@@ -15,6 +15,7 @@ namespace UTMLuncher
     {
         Settings tempSett;
         ClassOfMyDelegate.MyDelegate d;
+        
         public Config(ClassOfMyDelegate.MyDelegate sender, Settings sett)
         {
             this.FormBorderStyle = FormBorderStyle.FixedSingle;

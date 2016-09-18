@@ -86,7 +86,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Checks.cs" />
-    <Compile Include="Class1.cs" />
+    <Compile Include="ClassOfMyDelegate.cs" />
     <Compile Include="Config.cs">
       <SubType>Form</SubType>
     </Compile>

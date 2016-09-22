@@ -11,13 +11,15 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.ServiceProcess;
 using System.IO;
+using Net.Pkcs11Interop.HighLevelAPI;
 
-namespace UTMLuncher
+namespace UTMLauncher
 {
     public partial class Form1 : Form
     {
         public Settings sett;
-
+        public string currentSerial;
+        public bool currentBaseIsExist;
         public bool internetConnection;
 
         public Form1()
@@ -25,13 +27,58 @@ namespace UTMLuncher
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             InitializeComponent();
             sett = new Settings();
-            //checkedListBox1.CheckOnClick = false;
             this.backgroundWorker1.RunWorkerAsync();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //needCheck = true;
+            CheckBase();
+        }
+
+        public void CheckBase()
+        {
+            JaCartaInfo jaCartaInfo = new JaCartaInfo("jcPKCS11-2.dll");
+            currentSerial = jaCartaInfo.GetSerial();
+            try
+            {
+                dbCheck.isRightCard(sett, currentSerial);
+                currentBaseIsExist = true;
+            }
+            catch (Exception exc)
+            {
+                if (exc.Message == "Вставлена карта, не соответствующая базе.\nПытаюсь найти базу для этого токена")
+                {
+                    MessageBox.Show(exc.Message, "Внимание");
+                    currentBaseIsExist = true;
+                }
+
+                if (exc.Message == "База не подписана!\nПри полной загрузке УТМ будет добавлена подпись")
+                {
+                    MessageBox.Show(exc.Message, "Внимание");
+                    currentBaseIsExist = true;
+                }
+
+                if (exc.Message == "База данных отсутствует\nОна будет извлечена или создана новая")
+                {
+                    MessageBox.Show(exc.Message, "Внимание");
+                    currentBaseIsExist = false;
+                }
+
+                UTM.StopTransport(sett.Path);
+                try
+                {
+                    dbCheck.SwapBase(sett, currentBaseIsExist, currentSerial);
+                }
+                catch(Exception exception)
+                {
+                    if (exception.Message == "База данных данной карты отсутствует.\n Старая база перенесена.\nПри запуске УТМ будет создана подпись")
+                    {
+                        MessageBox.Show(exc.Message, "Внимание");
+                        currentBaseIsExist = false;
+                    }
+                }
+                
+            }            
         }
 
         private void Checkings(ref bool Transport,ref bool TransportMonitoring,ref bool TransportUpdater)
@@ -59,6 +106,7 @@ namespace UTMLuncher
         {
             try
             {
+                CheckBase();
                 UTM.Run(sett.Adress, sett.Path, internetConnection);
             }
             catch(Exception exc)
@@ -72,17 +120,9 @@ namespace UTMLuncher
         private void button2_Click(object sender, EventArgs e)
         {
             try
-            {
-                if (Directory.Exists(sett.Path + "\\transporter\\transportDB"))
-                {
-                    UTM.StopTransport(sett.Path);
-                    //Directory.Move(sett.Path + "\\transporter\\transportDB", sett.Path + "\\transporter\\transportDBold");
-                    Directory.Delete(sett.Path + "\\transporter\\transportDB", true);
-                }
-                else
-                { 
-                    UTM.StopTransport(sett.Path);
-                }
+            {                
+                UTM.StopTransport(sett.Path);
+                dbCheck.CloseBase(sett, currentBaseIsExist, currentSerial);
             }
             catch (Exception exc)
             {
@@ -196,7 +236,6 @@ namespace UTMLuncher
         {
             ConnectDevices.Connect(ref m);
             base.WndProc(ref m);
-
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -224,6 +263,7 @@ namespace UTMLuncher
             if (currentState.utmConnection)
             {
                 checkedListBox1.Items.Add("Веб-интерфейс УТМ", true);
+                dbCheck.TryWrite(sett, currentSerial);
             }
             else
             {

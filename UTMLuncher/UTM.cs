@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.ServiceProcess;
 using System.Diagnostics;
 
-namespace UTMLuncher
+namespace UTMLauncher
 {
     class UTM
     {

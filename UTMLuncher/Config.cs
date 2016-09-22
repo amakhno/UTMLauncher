@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 
-namespace UTMLuncher
+namespace UTMLauncher
 {
     public partial class Config : Form
     {

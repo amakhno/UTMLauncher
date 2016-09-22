@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.ServiceProcess;
 
-namespace UTMLuncher
+namespace UTMLauncher
 {
     class Checks
     {

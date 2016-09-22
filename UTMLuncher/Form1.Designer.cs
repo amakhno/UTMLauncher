@@ -1,4 +1,4 @@
-﻿namespace UTMLuncher
+﻿namespace UTMLauncher
 {
     partial class Form1
     {

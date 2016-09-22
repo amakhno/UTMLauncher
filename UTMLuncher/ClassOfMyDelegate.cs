@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UTMLuncher
+namespace UTMLauncher
 {
     public static class ClassOfMyDelegate
     {

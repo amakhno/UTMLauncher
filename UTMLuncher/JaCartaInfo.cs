@@ -7,6 +7,7 @@ using Net.Pkcs11Interop.HighLevelAPI;
 
 namespace UTMLauncher
 {
+    public class JaCartaInfo
     {
         private Pkcs11 Library;
 
@@ -22,6 +23,7 @@ namespace UTMLauncher
             List<Slot> listOfSlots = Library.GetSlotList(true);
             try
             {
+                result = listOfSlots[0].GetTokenInfo().SerialNumber;
             }
             catch
             {

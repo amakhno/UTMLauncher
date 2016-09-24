@@ -41,6 +41,7 @@
             this.настройкиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.удалитьБДToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -89,6 +90,7 @@
             this.файлToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.включитьТранспортToolStripMenuItem,
             this.отключитьВсеToolStripMenuItem,
+            this.удалитьБДToolStripMenuItem,
             this.авторToolStripMenuItem,
             this.настройкиToolStripMenuItem});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
@@ -131,8 +133,16 @@
             // 
             // backgroundWorker1
             // 
+            this.backgroundWorker1.WorkerSupportsCancellation = true;
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            // 
+            // удалитьБДToolStripMenuItem
+            // 
+            this.удалитьБДToolStripMenuItem.Name = "удалитьБДToolStripMenuItem";
+            this.удалитьБДToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.удалитьБДToolStripMenuItem.Text = "Удалить БД";
+            this.удалитьБДToolStripMenuItem.Click += new System.EventHandler(this.удалитьБДToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -150,6 +160,7 @@
             this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "Запуск УТМ";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -171,6 +182,7 @@
         private System.Windows.Forms.ToolStripMenuItem включитьТранспортToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem отключитьВсеToolStripMenuItem;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.ToolStripMenuItem удалитьБДToolStripMenuItem;
     }
 }
 

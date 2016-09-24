@@ -34,7 +34,7 @@ namespace UTMLauncher
         {
             try
             {
-                dbCheck.IsNeedToWrite(sett, dbCheck.GetCurrentSerial());
+                dbAction.IsNeedToWrite(sett, dbAction.GetCurrentSerial(),ref needToWrite);
             }
             catch(Exception exception)
             {
@@ -68,7 +68,7 @@ namespace UTMLauncher
         {
             try
             {
-                needToWrite = dbCheck.IsNeedToWrite(sett, dbCheck.GetCurrentSerial());                
+                dbAction.IsNeedToWrite(sett, dbAction.GetCurrentSerial(), ref needToWrite);                
             }
             catch(Exception exc)
             {
@@ -83,8 +83,8 @@ namespace UTMLauncher
         private void button2_Click(object sender, EventArgs e)
         {
             try
-            {                
-                dbCheck.CloseBase(sett, currentBaseIsExist, dbCheck.GetCurrentSerial());
+            {
+                dbAction.CloseBase(sett, currentBaseIsExist, dbAction.GetCurrentSerial());
             }
             catch (Exception exc)
             {
@@ -221,10 +221,13 @@ namespace UTMLauncher
 
             AddToList(Transport, TransportMonitoring, TransportUpdater);
 
-            if ((currentState.utmConnection)&&(needToWrite))
+            if (currentState.utmConnection)
             {
                 checkedListBox1.Items.Add("Веб-интерфейс УТМ", true);
-                dbCheck.TryWrite(sett, dbCheck.GetCurrentSerial());
+                if (needToWrite)
+                {
+                    dbAction.TryWrite(sett, dbAction.GetCurrentSerial());
+                }
             }
             else
             {
@@ -237,6 +240,26 @@ namespace UTMLauncher
         {
             
             e.Result = FullChecks(null);
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            timer1.Enabled = false;
+            backgroundWorker1.CancelAsync();
+            backgroundWorker1.Dispose();            
+            Application.Exit();
+        }
+
+        private void удалитьБДToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                dbAction.DeleteBase(sett);
+            }
+            catch(Exception exc)
+            {
+                MessageBox.Show(exc.Message);
+            }
         }
     }
 }

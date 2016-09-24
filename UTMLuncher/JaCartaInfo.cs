@@ -32,5 +32,10 @@ namespace UTMLauncher
 
             return result;
         }
+
+        public void Dispose()
+        {
+            Library.Dispose();
+        }
     }
 }

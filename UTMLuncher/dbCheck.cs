@@ -4,46 +4,64 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Windows.Forms;
 
 namespace UTMLauncher
 {
     static class dbCheck
     {
-        public static bool isRightCard(Settings settings, String serial)
+        public static bool IsNeedToWrite(Settings settings, String serial)
         {
-            if (!Directory.Exists(settings.Path + "\\transporter\\transportDB"))
+            string Message;
+            if (!CurrentBaseDirectoryIsExist(settings))
             {
-                throw new Exception("База данных отсутствует\nОна будет извлечена или создана новая");
+                Message = "База данных отсутствует\n";
+                if (BaseWithCurrentSerialIsExist(settings, serial))
+                {
+                    Directory.Move(settings.Path + "\\transporter\\" + serial + "transportDB", settings.Path + "\\transporter\\transportDB");
+                    Message += "Была загружена старая база данных";
+                }
+                throw new Exception(Message);
             }
             if (!File.Exists(settings.Path + "\\transporter\\transportDB\\serial.cfg"))
             {
-                throw new Exception("База не подписана!\nПри полной загрузке УТМ будет добавлена подпись");
-            }
-            string dbSerial = File.ReadAllLines(settings.Path + "\\transporter\\transportDB\\serial.cfg")[0];
-            if (dbSerial != serial)
+                Message = "База не подписана!\nВставьте правильную карту и дождитесь подписи (полного запуска)";
+                throw new Exception(Message);
+            }            
+            if (CurrentBaseSerial(settings) != serial)
             {
-                throw new Exception("Вставлена карта, не соответствующая базе.\nПытаюсь найти базу для этого токена");
+                Message = "Вставлена карта, не соответствующая базе.\n";
+                UTM.StopTransport(settings.Path);
+                Directory.Move(settings.Path + "\\transporter\\transportDB", settings.Path + "\\transporter\\" + CurrentBaseSerial(settings) + "transportDB");
+                Message += "Старая база перенесена\n";
+                if (BaseWithCurrentSerialIsExist(settings, serial))
+                {
+                    Directory.Move(settings.Path + "\\transporter\\" + serial + "transportDB", settings.Path + "\\transporter\\transportDB");
+                    Message += "Была загружена база данных для текущего ключа\n";
+                }
+                else
+                {
+                    Message += "База данных для текущего ключа не найдена\n";
+                    Message += "Будет создана новая\n";
+                }
+                throw new Exception(Message);
             }
-            return true;
+            return false;
         }
 
-        public static bool SwapBase(Settings settings, bool currentBaseIsExist, String currentSerial)
+        private static bool BaseWithCurrentSerialIsExist(Settings settings, String serial)
         {
-            if (currentBaseIsExist)
-            {
-                String serialInBase = File.ReadAllLines(settings.Path + "\\transporter\\transportDB\\serial.cfg")[0];
-                Directory.Move(settings.Path + "\\transporter\\transportDB", settings.Path + "\\transporter\\" + serialInBase + "transportDB");
-            }            
-            if (!Directory.Exists(settings.Path + "\\transporter\\" + currentSerial + "transportDB"))
-            {
-                throw new Exception("База данных данной карты отсутствует.\nПри запуске УТМ будет создана подпись");
-            }
-            else
-            {
-                Directory.Move(settings.Path + "\\transporter\\" + currentSerial + "transportDB", settings.Path + "\\transporter\\transportDB");
-            }
-            
-            return true;
+            return Directory.Exists(settings.Path + "\\transporter\\" + serial + "transportDB");
+        }
+
+        private static bool CurrentBaseDirectoryIsExist(Settings settings)
+        {
+            return (Directory.Exists(settings.Path + "\\transporter\\transportDB"));
+        }
+
+        private static string CurrentBaseSerial(Settings settings)
+        {
+            return File.ReadAllLines(settings.Path + "\\transporter\\transportDB\\serial.cfg")[0];
         }
 
         public static void TryWrite(Settings settings, String currentSerial)
@@ -56,11 +74,19 @@ namespace UTMLauncher
 
         public static void CloseBase(Settings settings, bool currentBaseIsExist, String currentSerial)
         {
+            UTM.StopTransport(settings.Path);
             if (File.Exists(settings.Path + "\\transporter\\transportDB\\serial.cfg"))
-            { 
+            {
+                UTM.StopTransport(settings.Path);
                 string baseSerial =  File.ReadAllLines(settings.Path + "\\transporter\\transportDB\\serial.cfg")[0];
                 Directory.Move(settings.Path + "\\transporter\\transportDB", settings.Path + "\\transporter\\" + baseSerial + "transportDB");
             }
+        }      
+
+        public static string GetCurrentSerial()
+        {
+            JaCartaInfo jaCartaInfo = new JaCartaInfo("jcPKCS11-2.dll");
+            return jaCartaInfo.GetSerial();
         }
     }
 }

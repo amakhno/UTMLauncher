@@ -18,7 +18,7 @@ namespace UTMLauncher
     public partial class Form1 : Form
     {
         public Settings sett;
-        public string currentSerial;
+        public bool needToWrite = false;
         public bool currentBaseIsExist;
         public bool internetConnection;
 
@@ -32,53 +32,15 @@ namespace UTMLauncher
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            CheckBase();
-        }
-
-        public void CheckBase()
-        {
-            JaCartaInfo jaCartaInfo = new JaCartaInfo("jcPKCS11-2.dll");
-            currentSerial = jaCartaInfo.GetSerial();
             try
             {
-                dbCheck.isRightCard(sett, currentSerial);
-                currentBaseIsExist = true;
+                dbCheck.IsNeedToWrite(sett, dbCheck.GetCurrentSerial());
             }
-            catch (Exception exc)
+            catch(Exception exception)
             {
-                if (exc.Message == "Вставлена карта, не соответствующая базе.\nПытаюсь найти базу для этого токена")
-                {
-                    MessageBox.Show(exc.Message, "Внимание");
-                    currentBaseIsExist = true;
-                }
-
-                if (exc.Message == "База не подписана!\nПри полной загрузке УТМ будет добавлена подпись")
-                {
-                    MessageBox.Show(exc.Message, "Внимание");
-                    currentBaseIsExist = true;
-                }
-
-                if (exc.Message == "База данных отсутствует\nОна будет извлечена или создана новая")
-                {
-                    MessageBox.Show(exc.Message, "Внимание");
-                    currentBaseIsExist = false;
-                }
-
-                UTM.StopTransport(sett.Path);
-                try
-                {
-                    dbCheck.SwapBase(sett, currentBaseIsExist, currentSerial);
-                }
-                catch(Exception exception)
-                {
-                    if (exception.Message == "База данных данной карты отсутствует.\n Старая база перенесена.\nПри запуске УТМ будет создана подпись")
-                    {
-                        MessageBox.Show(exc.Message, "Внимание");
-                        currentBaseIsExist = false;
-                    }
-                }
-                
-            }            
+                MessageBox.Show(exception.Message);
+            }
+            
         }
 
         private void Checkings(ref bool Transport,ref bool TransportMonitoring,ref bool TransportUpdater)
@@ -106,14 +68,15 @@ namespace UTMLauncher
         {
             try
             {
-                CheckBase();
-                UTM.Run(sett.Adress, sett.Path, internetConnection);
+                needToWrite = dbCheck.IsNeedToWrite(sett, dbCheck.GetCurrentSerial());                
             }
             catch(Exception exc)
             {
                 MessageBox.Show(exc.Message);
+                UTM.Run(sett.Adress, sett.Path, internetConnection);
                 return;
             }
+            UTM.Run(sett.Adress, sett.Path, internetConnection);
         }
 
         //Остановка Транспортного модуля
@@ -121,8 +84,7 @@ namespace UTMLauncher
         {
             try
             {                
-                UTM.StopTransport(sett.Path);
-                dbCheck.CloseBase(sett, currentBaseIsExist, currentSerial);
+                dbCheck.CloseBase(sett, currentBaseIsExist, dbCheck.GetCurrentSerial());
             }
             catch (Exception exc)
             {
@@ -195,7 +157,6 @@ namespace UTMLauncher
             try
             {
                 UTM.Stop(sett.Path);
-                //needCheck = true;
             }
             catch (Exception exc)
             {
@@ -260,10 +221,10 @@ namespace UTMLauncher
 
             AddToList(Transport, TransportMonitoring, TransportUpdater);
 
-            if (currentState.utmConnection)
+            if ((currentState.utmConnection)&&(needToWrite))
             {
                 checkedListBox1.Items.Add("Веб-интерфейс УТМ", true);
-                dbCheck.TryWrite(sett, currentSerial);
+                dbCheck.TryWrite(sett, dbCheck.GetCurrentSerial());
             }
             else
             {

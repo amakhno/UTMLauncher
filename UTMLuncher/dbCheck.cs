@@ -24,6 +24,7 @@ namespace UTMLauncher
                     throw new Exception(Message);
                 }
                 Message += "Подписанной базы не обнаружено. Будет создана новая";
+                NeedToWrite = true;
                 throw new Exception(Message);
             }
             if (!File.Exists(settings.Path + "\\transporter\\transportDB\\serial.cfg"))

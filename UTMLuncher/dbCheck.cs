@@ -21,7 +21,9 @@ namespace UTMLauncher
                 {
                     Directory.Move(settings.Path + "\\transporter\\" + serial + "transportDB", settings.Path + "\\transporter\\transportDB");
                     Message += "Была загружена старая база данных";
+                    throw new Exception(Message);
                 }
+                Message += "Подписанной базы не обнаружено. Будет создана новая";
                 throw new Exception(Message);
             }
             if (!File.Exists(settings.Path + "\\transporter\\transportDB\\serial.cfg"))
@@ -100,9 +102,9 @@ namespace UTMLauncher
 
         public static string GetCurrentSerial()
         {
-            JaCartaInfo jaCartaInfo = new JaCartaInfo("jcPKCS11-2.dll");
-            string result = jaCartaInfo.GetSerial();
-            jaCartaInfo.Dispose();
+            JaCartaInfo jaCartaInfo = new JaCartaInfo("jcPKCS11-2.dll");            
+            string result = jaCartaInfo.GetSerial();                      
+            jaCartaInfo.Dispose();                       
             return result;
         }
 

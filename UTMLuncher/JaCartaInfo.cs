@@ -27,6 +27,7 @@ namespace UTMLauncher
             }
             catch
             {
+                this.Dispose();
                 throw new Exception("Не могу получить информацию о токене.\nУбедитесь, что JaCarta установлена");
             }
 
